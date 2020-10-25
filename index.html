@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+    <head>
+        <title>JsDB</title>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <script src="db.js" type="text/javascript"></script>
+        <script src="testdb.js" type="text/javascript"></script>
+        <script>
+         let db = new Jsql(data);
+         const colors = ["blue", "darkblue", "yellow", "orange", "red"];
+         const border = (depth) => {
+             return "border: 3px solid " +
+                    colors[depth % colors.length] +
+                    ";";
+         };
+         
+         function query() {
+             let json = document.getElementById("query").value;
+             let div  = document.getElementById("results");
+
+             div.innerHTML = "";
+
+             if (json === "") {
+                 div.appendChild( makeBox(db.data) );
+                 return;
+             }
+
+             for(let result of db.select(eval("q = {" + json + "}"))) {
+                 div.appendChild( makeBox(result) );
+             }
+         }
+
+         function makeBox(obj, depth = 0) {
+             let box = document.createElement("div");
+             box.style = border(depth);
+
+             if (depth === 0) {
+                 box.style = border(depth) + "display: flex;"
+             }
+
+             for(let field in obj) {
+                 let value = obj[field];
+
+                 if (!obj.hasOwnProperty(field)) {
+                     return
+                 }
+
+                 if ( value instanceof Object ) {
+                     /* Chave-Valor com valor de Objeto */
+                     let innerBox = makeBox(value, depth + 1)
+                     innerBox.insertBefore(
+                         document.createTextNode(field),
+                         innerBox.firstChild
+                     )
+                     box.appendChild( innerBox )
+
+                     /* box.appendChild(document.createTextNode(field)) */
+
+                 } else {
+                     /* Chave-Valor com valor simples */
+                     let deepestBox = document.createElement("div")
+                     deepestBox.style = border(depth + 1) + "max-width: 20em;"
+                     deepestBox.appendChild(
+                         document.createTextNode(field + ": " + value)
+                     )
+                     box.appendChild(deepestBox)
+                 }
+             }
+
+             return box;
+         }
+        </script>
+
+        <input
+            id="query"
+            type="text"
+            oninput="query()"/>
+        <div
+            id="results"
+            style="border: 1px solid black; width: max-content">
+        </div>
+
+    </body>
+</html>
