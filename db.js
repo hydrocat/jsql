@@ -89,8 +89,17 @@ class Jsql {
      seja verdade.
   */
   select(query) {
+
+    /*
+     * Se query for um array, fazemos uma conjuncao (OR) com cada query.
+     * logo, se a primeira der positivo, verifica-se o proximo ojeto.
+     * se a query der negativo, executa a proxima query
+     */
+    if (!(query instanceof Array)) {
+      query = [query];
+    }
     return this.data.filter(
-      element => this.matches(query, element)
+      element => query.some( q => this.matches(q, element))
     );
   }
 }

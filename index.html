@@ -17,17 +17,26 @@
          };
          
          function query() {
-             let json = document.getElementById("query").value;
+             let textQueries = [
+                 ...document.getElementById("queries").children
+             ]
+             
+             let objectQueries = textQueries.map(
+                 q => eval("q = {" + q.value + "}")
+             )
+             
              let div  = document.getElementById("results");
-
              div.innerHTML = "";
 
-             if (json === "") {
-                 div.appendChild( makeBox(db.data) );
+             if (objectQueries.length === 0 ||
+                 objectQueries.every( e => e.value === "")) {
+                 db.data.forEach( e => {
+                     div.appendChild( makeBox(e) );
+                 })
                  return;
              }
 
-             for(let result of db.select(eval("q = {" + json + "}"))) {
+             for(let result of db.select(objectQueries)) {
                  div.appendChild( makeBox(result) );
              }
          }
@@ -35,10 +44,6 @@
          function makeBox(obj, depth = 0) {
              let box = document.createElement("div");
              box.style = border(depth);
-
-             if (depth === 0) {
-                 box.style = border(depth) + "display: flex;"
-             }
 
              for(let field in obj) {
                  let value = obj[field];
@@ -71,15 +76,43 @@
 
              return box;
          }
+
+         function addOr() {
+             let div = document.getElementById("queries")
+             let input = document.createElement("input")
+             input.type = "text"
+             div.appendChild( input )
+         }
+         function removeOr() {
+             let div = document.getElementById("queries")
+             div.removeChild(div.lastChild)
+         }
+
         </script>
 
-        <input
-            id="query"
-            type="text"
-            oninput="query()"/>
+        <button onclick="query()">
+            Query Jsql
+        </button>
+        
+        <button onclick="addOr()">
+            Add OR object
+        </button>
+        <button onclick="removeOr()">
+            Remove OR object
+        </button>
+
+
+        <div
+            id="queries"
+            type="text">
+        </div>
+        <!-- <input
+             id="query"
+             type="text"
+             oninput="query()"/> -->
         <div
             id="results"
-            style="border: 1px solid black; width: max-content">
+            style="border: 1px solid black; width: max-content; display: flex;">
         </div>
 
     </body>
